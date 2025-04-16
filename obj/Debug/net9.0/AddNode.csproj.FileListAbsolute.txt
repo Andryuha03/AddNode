@@ -1,0 +1,14 @@
+C:\Users\Zverev_Ad\source\repos\AddNode\bin\Debug\net9.0\AddNode.exe
+C:\Users\Zverev_Ad\source\repos\AddNode\bin\Debug\net9.0\AddNode.deps.json
+C:\Users\Zverev_Ad\source\repos\AddNode\bin\Debug\net9.0\AddNode.runtimeconfig.json
+C:\Users\Zverev_Ad\source\repos\AddNode\bin\Debug\net9.0\AddNode.dll
+C:\Users\Zverev_Ad\source\repos\AddNode\bin\Debug\net9.0\AddNode.pdb
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.AssemblyInfoInputs.cache
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.AssemblyInfo.cs
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.csproj.CoreCompileInputs.cache
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.dll
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\refint\AddNode.dll
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.pdb
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.genruntimeconfig.cache
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\ref\AddNode.dll
