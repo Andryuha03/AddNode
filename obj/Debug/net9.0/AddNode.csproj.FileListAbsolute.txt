@@ -12,3 +12,4 @@ C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\refint\AddNode.dll
 C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.pdb
 C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.genruntimeconfig.cache
 C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\ref\AddNode.dll
+C:\Users\Zverev_Ad\source\repos\AddNode\obj\Debug\net9.0\AddNode.sourcelink.json
