@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 while (true)
 {
-    List<string> strings = new List<string>();
+    List<Note> strings = new List<Note>();
     
     string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     string fileName = "txt.txt";
@@ -9,7 +9,14 @@ while (true)
 
     if (File.Exists(filePath))
     {
-        strings = File.ReadAllLines(filePath).ToList();
+        strings = File.ReadLines(filePath).Select(line =>
+        {
+            var parts = line.Split('|');                
+            int id = int.Parse(parts[0]);
+            string text = parts[1];
+            DateTime date = DateTime.Parse(parts[2]);
+            return new Note(id, text, date);
+        }).ToList();
     }
 
     string? anywords;
@@ -54,5 +61,17 @@ while (true)
             strings.RemoveAt(ChooseDel-1);
             File.WriteAllLines(filePath, strings);
             break;
+    }
+}
+class Note
+{
+    public int ID {  get; set; }
+    public string Text { get; set; }
+    public DateTime DateAt { get; set; }
+
+    public Note(int id, string text, DateTime date) {
+        ID = id;
+        Text = text;
+        DateAt = date;
     }
 }
