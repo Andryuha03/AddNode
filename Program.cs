@@ -38,8 +38,11 @@ while (true)
 
             Console.WriteLine("Оставьте заметку");
             anywords = Console.ReadLine();
-            strings.Add(anywords);
-            File.WriteAllLines(filePath, strings);
+            int newId = strings.Any() ? strings.Max(n => n.ID) + 1 : 1;
+            Note newNote = new Note(newId, anywords, DateTime.Now);
+            strings.Add(newNote);
+
+            File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
             
             break;
         case 2:
@@ -47,19 +50,25 @@ while (true)
             {
                 Console.WriteLine("Тут пока пусто...\n");
             }
-            for (int i = 0;i < strings.Count;i++)
+            foreach (var i in strings)
             {
                 Console.WriteLine("----------");
-                Console.WriteLine($"{i+1}. {strings[i]}");
+                Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
                 Console.WriteLine("----------");
             }
             break;
         case 3:
-            File.WriteAllText(filePath, String.Empty);
             Console.WriteLine("Выберите номер заметки для удаления");
-            int ChooseDel = Convert.ToInt32(Console.ReadLine());
-            strings.RemoveAt(ChooseDel-1);
-            File.WriteAllLines(filePath, strings);
+            int ChooseDel = int.Parse(Console.ReadLine());
+            Note noteToRemove = strings.FirstOrDefault(n => n.ID == ChooseDel);
+            if (noteToRemove != null)
+            {
+                strings.Remove(noteToRemove);
+                Console.WriteLine("Заметка удалена");
+            }
+            else
+            Console.WriteLine("Заметка с таким ID не найдена");
+            File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
             break;
     }
 }
