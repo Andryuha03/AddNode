@@ -61,7 +61,12 @@ while (true)
             Console.WriteLine("Выберите номер заметки для удаления");
             int ChooseDel = int.Parse(Console.ReadLine());
             Note noteToRemove = strings.FirstOrDefault(n => n.ID == ChooseDel);
-            if (noteToRemove != null)
+            if(strings.Count == 0)
+            {
+                Console.WriteLine("Нет заметок для удаления");
+                break;
+            }
+            else if (noteToRemove != null)
             {
                 strings.Remove(noteToRemove);
                 Console.WriteLine("Заметка удалена");
