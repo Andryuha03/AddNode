@@ -2,6 +2,7 @@
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.VisualBasic;
 while (true)
 {
     List<Note> strings = new List<Note>();
@@ -21,8 +22,6 @@ while (true)
             return new Note(id, text, date);
         }).ToList();
     }
-
-    string? anywords;
 
     Console.WriteLine("Выберите одно из действий:" +
         "\n* Создать файл для заметок [0]" +
@@ -44,102 +43,119 @@ while (true)
         case 0:
             using (File.Create(filePath)) { }
             break;
-        case 1:
-
-            Console.WriteLine("Оставьте заметку");
-            anywords = Console.ReadLine();
-            int newId = strings.Any() ? strings.Max(n => n.ID) + 1 : 1;
-            Note newNote = new Note(newId, anywords, DateTime.Now);
-            strings.Add(newNote);
-
-            File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
-            
+        case 1: // Добавить заметку
+            AddNotes(strings, filePath);
             break;
-        case 2:
-            if (strings == null || strings.Count == 0)
-            {
-                Console.WriteLine("Тут пока пусто...\n");
-            }
-            foreach (var i in strings)
-            {
-                Console.WriteLine("----------");
-                Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
-                Console.WriteLine("----------");
-            }
+        case 2: // Посмотреть все заметки
+            ShowAllNotes(strings);
             break;
-        case 3:
+        case 3: // Удалить заявку
             if (strings.Count == 0)
             {
                 Console.WriteLine("Нет заметок для удаления");
                 break;
             }
-            Console.WriteLine("Выберите номер заметки для удаления");
-            int ChooseDel = int.Parse(Console.ReadLine());
-            Note noteToRemove = strings.FirstOrDefault(n => n.ID == ChooseDel);
-
-            if (noteToRemove != null)
-            {
-                strings.Remove(noteToRemove);
-                Console.WriteLine("Заметка удалена");
-            }
-            else
-            Console.WriteLine("Заметка с таким ID не найдена");
-            File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+            DeleteNotes(strings, filePath);
             break;
-        case 4:
+        case 4: //Поиск
             if (strings.Count == 0)
             {
                 Console.WriteLine("Нет заметок для поиска");
                 break;
             }
-            Console.WriteLine("Введите ключевое слово для поиска: ");
-            string? keyword = Console.ReadLine();
-            var SearchWord = strings.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
-            Console.WriteLine("Все найденные совпадения");
-            foreach (var word in SearchWord)
-            {
-                Console.WriteLine("----------");
-                Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
-                Console.WriteLine("----------");
-            }
+            SearchNotes(strings);
             break;
-        case 5:
+        case 5: // Редактирование
             if (strings.Count == 0)
             {
                 Console.WriteLine("Нет заметок для изменения");
                 break;
             }
-            try
-            {
-                Console.WriteLine("Для изменения записи введите её ID");
-                int idKeyWord = int.Parse(Console.ReadLine());
-                Note Searchid = strings.FirstOrDefault(n => n.ID == idKeyWord);
-                if (Searchid != null)
-                {
-                    Console.WriteLine("++++++++++");
-                    Console.WriteLine($"{Searchid.ID}. {Searchid.Text} ({Searchid.DateAt})");
-                    Console.WriteLine("++++++++++\n");
-                    Console.WriteLine("Запись найдена, теперь можете внести изменение");
-                    string? editText = Console.ReadLine();
-                    Searchid.Text = editText;
-                    Searchid.DateAt = DateTime.Now;
-
-                    File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
-
-                    Console.WriteLine("Запись была успешно измененна!");
-                }
-                else
-                {
-                    Console.WriteLine("Запись с таким ID не найдена");
-                    break;
-                }
-            }
-            catch {
-                Console.WriteLine("Нужно писать ID арабскими цифрами");
-            };
-
+            EditNotes(strings, filePath);
             break;
     }
+}
+
+void AddNotes(List<Note> notes, string path) // Добавить заметку
+{
+    Console.WriteLine("Оставьте заметку");
+    string? anywords = Console.ReadLine();
+    int newId = notes.Any() ? notes.Max(n => n.ID) + 1 : 1;
+    Note newNote = new Note(newId, anywords, DateTime.Now);
+    notes.Add(newNote);
+
+    File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+}
+
+void ShowAllNotes(List<Note> notes) // Посмотреть все заметки
+{
+    if (notes == null || notes.Count == 0)
+    {
+        Console.WriteLine("Тут пока пусто...\n");
+    }
+    foreach (var i in notes)
+    {
+        Console.WriteLine("----------");
+        Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
+        Console.WriteLine("----------");
+    }
+}
+void DeleteNotes(List<Note> notes, string path) // Удалить заявку
+{
+    Console.WriteLine("Выберите номер заметки для удаления");
+    int ChooseDel = int.Parse(Console.ReadLine());
+    Note noteToRemove = notes.FirstOrDefault(n => n.ID == ChooseDel);
+
+    if (noteToRemove != null)
+    {
+        notes.Remove(noteToRemove);
+        Console.WriteLine("Заметка удалена");
+    }
+    else
+        Console.WriteLine("Заметка с таким ID не найдена");
+    File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+}
+void SearchNotes(List<Note> notes)//Поиск
+{
+    Console.WriteLine("Введите ключевое слово для поиска: ");
+    string? keyword = Console.ReadLine();
+    var SearchWord = notes.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+    Console.WriteLine("Все найденные совпадения");
+    foreach (var word in SearchWord)
+    {
+        Console.WriteLine("----------");
+        Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
+        Console.WriteLine("----------");
+    }
+}
+void EditNotes(List<Note> notes, string path) // Редактирование
+{
+    try
+    {
+        Console.WriteLine("Для изменения записи введите её ID");
+        int idKeyWord = int.Parse(Console.ReadLine());
+        Note Searchid = notes.FirstOrDefault(n => n.ID == idKeyWord);
+        if (Searchid != null)
+        {
+            Console.WriteLine("++++++++++");
+            Console.WriteLine($"{Searchid.ID}. {Searchid.Text} ({Searchid.DateAt})");
+            Console.WriteLine("++++++++++\n");
+            Console.WriteLine("Запись найдена, теперь можете внести изменение");
+            string? editText = Console.ReadLine();
+            Searchid.Text = editText;
+            Searchid.DateAt = DateTime.Now;
+
+            File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+
+            Console.WriteLine("Запись была успешно измененна!");
+        }
+        else
+            Console.WriteLine("Запись с таким ID не найдена");
+    }
+    catch
+    {
+        Console.WriteLine("Нужно писать ID арабскими цифрами");
+    };
 }
 class Note
 {
