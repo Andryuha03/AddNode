@@ -34,7 +34,7 @@ while (true)
     switch (Choose)
     {
         case 0:
-            File.Create(filePath);
+            using (File.Create(filePath)) { }
             break;
         case 1:
 
@@ -60,15 +60,16 @@ while (true)
             }
             break;
         case 3:
-            Console.WriteLine("Выберите номер заметки для удаления");
-            int ChooseDel = int.Parse(Console.ReadLine());
-            Note noteToRemove = strings.FirstOrDefault(n => n.ID == ChooseDel);
-            if(strings.Count == 0)
+            if (strings.Count == 0)
             {
                 Console.WriteLine("Нет заметок для удаления");
                 break;
             }
-            else if (noteToRemove != null)
+            Console.WriteLine("Выберите номер заметки для удаления");
+            int ChooseDel = int.Parse(Console.ReadLine());
+            Note noteToRemove = strings.FirstOrDefault(n => n.ID == ChooseDel);
+
+            if (noteToRemove != null)
             {
                 strings.Remove(noteToRemove);
                 Console.WriteLine("Заметка удалена");
