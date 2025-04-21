@@ -1,11 +1,12 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.VisualBasic;
 while (true)
 {
-    List<Note> strings = new List<Note>();
+    Dictionary<int,Note> strings = new Dictionary<int, Note>();
     
     string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     string fileName = "txt.txt";
@@ -20,7 +21,7 @@ while (true)
             string text = parts[1];
             DateTime date = DateTime.Parse(parts[2]);
             return new Note(id, text, date);
-        }).ToList();
+        }).ToDictionary(note => note.ID);
     }
 
     Console.WriteLine("Выберите одно из действий:" +
@@ -76,65 +77,79 @@ while (true)
     }
 }
 
-void AddNotes(List<Note> notes, string path) // Добавить заметку
+void AddNotes(Dictionary<int, Note> notes, string path) // Добавить заметку
 {
     Console.WriteLine("Оставьте заметку");
     string? anywords = Console.ReadLine();
-    int newId = notes.Any() ? notes.Max(n => n.ID) + 1 : 1;
+    int newId = notes.Any() ? notes.Keys.Max() + 1 : 1;
     Note newNote = new Note(newId, anywords, DateTime.Now);
-    notes.Add(newNote);
-
-    File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+    notes.Add(newId, newNote);
+    try {
+        File.WriteAllLines(path, notes.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+        Console.WriteLine("*\nЗаметка успешно создана\n*\n");
+    }
+    catch(IOException ex) {
+        Console.WriteLine($"Ошибка при записи: {ex.Message}");
+    }
 }
 
-void ShowAllNotes(List<Note> notes) // Посмотреть все заметки
+void ShowAllNotes(Dictionary<int, Note> notes) // Посмотреть все заметки
 {
     if (notes == null || notes.Count == 0)
     {
         Console.WriteLine("Тут пока пусто...\n");
     }
-    foreach (var i in notes)
+    foreach (var i in notes.Values)
     {
         Console.WriteLine("----------");
         Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
         Console.WriteLine("----------");
     }
 }
-void DeleteNotes(List<Note> notes, string path) // Удалить заявку
+void DeleteNotes(Dictionary<int, Note> notes, string path) // Удалить заявку
 {
     Console.WriteLine("Выберите номер заметки для удаления");
     int ChooseDel = int.Parse(Console.ReadLine());
-    Note noteToRemove = notes.FirstOrDefault(n => n.ID == ChooseDel);
+    Note noteToRemove = notes.Values.FirstOrDefault(n => n.ID == ChooseDel);
 
     if (noteToRemove != null)
     {
-        notes.Remove(noteToRemove);
+        notes.Remove(ChooseDel);
         Console.WriteLine("Заметка удалена");
     }
     else
         Console.WriteLine("Заметка с таким ID не найдена");
-    File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+    
+    File.WriteAllLines(path, notes.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
 }
-void SearchNotes(List<Note> notes)//Поиск
+void SearchNotes(Dictionary<int, Note> notes)//Поиск
 {
     Console.WriteLine("Введите ключевое слово для поиска: ");
     string? keyword = Console.ReadLine();
-    var SearchWord = notes.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
-    Console.WriteLine("Все найденные совпадения");
-    foreach (var word in SearchWord)
+    var SearchWord = notes.Values.Where(n=>n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+    if (SearchWord.Count == 0)
     {
-        Console.WriteLine("----------");
-        Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
-        Console.WriteLine("----------");
+        Console.WriteLine("Совпадений не найдено");
+        return;
+    }
+    else
+    {
+        Console.WriteLine("Все найденные совпадения");
+        foreach (var word in SearchWord)
+        {
+            Console.WriteLine("----------");
+            Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
+            Console.WriteLine("----------");
+        }
     }
 }
-void EditNotes(List<Note> notes, string path) // Редактирование
+void EditNotes(Dictionary<int, Note> notes, string path) // Редактирование
 {
     try
     {
         Console.WriteLine("Для изменения записи введите её ID");
         int idKeyWord = int.Parse(Console.ReadLine());
-        Note Searchid = notes.FirstOrDefault(n => n.ID == idKeyWord);
+        Note Searchid = notes.Values.FirstOrDefault(n => n.ID == idKeyWord);
         if (Searchid != null)
         {
             Console.WriteLine("++++++++++");
@@ -145,7 +160,7 @@ void EditNotes(List<Note> notes, string path) // Редактирование
             Searchid.Text = editText;
             Searchid.DateAt = DateTime.Now;
 
-            File.WriteAllLines(path, notes.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+            File.WriteAllLines(path, notes.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
 
             Console.WriteLine("Запись была успешно измененна!");
         }
