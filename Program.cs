@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.Security.Cryptography;
 while (true)
 {
@@ -23,11 +24,18 @@ while (true)
 
     string? anywords;
 
-    Console.WriteLine("Выберите одно из действий:\n* Создать файл для заметок [0]\n* Добавить заметку [1] \n* Посмотреть все заметки [2]\n* Удалить заметку [3]\n* Поиск по ключевому слову [4]\n* Выйти [5]");
+    Console.WriteLine("Выберите одно из действий:" +
+        "\n* Создать файл для заметок [0]" +
+        "\n* Добавить заметку [1] " +
+        "\n* Посмотреть все заметки [2]" +
+        "\n* Удалить заметку [3]" +
+        "\n* Поиск по ключевому слову [4]" +
+        "\n* Редактировать заметку [5]" +
+        "\n* Выйти [6]");
     int Choose = Convert.ToInt32(Console.ReadLine());
-    if (Choose == 5)
+    if (Choose == 6)
         break;
-    if (Choose >= 6)
+    if (Choose >= 7)
         Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
         
 
@@ -79,6 +87,11 @@ while (true)
             File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
             break;
         case 4:
+            if (strings.Count == 0)
+            {
+                Console.WriteLine("Нет заметок для поиска");
+                break;
+            }
             Console.WriteLine("Введите ключевое слово для поиска: ");
             string? keyword = Console.ReadLine();
             var SearchWord = strings.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -89,6 +102,41 @@ while (true)
                 Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
                 Console.WriteLine("----------");
             }
+            break;
+        case 5:
+            if (strings.Count == 0)
+            {
+                Console.WriteLine("Нет заметок для изменения");
+                break;
+            }
+            try
+            {
+                Console.WriteLine("Для изменения записи введите её ID");
+                int idKeyWord = int.Parse(Console.ReadLine());
+                Note Searchid = strings.FirstOrDefault(n => n.ID == idKeyWord);
+                if (Searchid != null)
+                {
+                    Console.WriteLine("++++++++++");
+                    Console.WriteLine($"{Searchid.ID}. {Searchid.Text} ({Searchid.DateAt})");
+                    Console.WriteLine("++++++++++\n");
+                    Console.WriteLine("Запись найдена, теперь можете внести изменение");
+                    string? editText = Console.ReadLine();
+                    Searchid.Text = editText;
+                    Searchid.DateAt = DateTime.Now;
+
+                    File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+
+                    Console.WriteLine("Запись была успешно измененна!");
+                }
+                else
+                {
+                    Console.WriteLine("Запись с таким ID не найдена");
+                    break;
+                }
+            }
+            catch {
+                Console.WriteLine("Нужно писать ID арабскими цифрами");
+            };
 
             break;
     }
