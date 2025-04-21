@@ -1,10 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
-using Microsoft.VisualBasic;
-while (true)
+﻿while (true)
 {
     Dictionary<int,Note> strings = new Dictionary<int, Note>();
     
@@ -112,11 +106,8 @@ void DeleteNotes(Dictionary<int, Note> notes, string path) // Удалить з�
     int ChooseDel = int.Parse(Console.ReadLine());
     Note noteToRemove = notes.Values.FirstOrDefault(n => n.ID == ChooseDel);
 
-    if (noteToRemove != null)
-    {
-        notes.Remove(ChooseDel);
+    if (notes.Remove(ChooseDel))
         Console.WriteLine("Заметка удалена");
-    }
     else
         Console.WriteLine("Заметка с таким ID не найдена");
     
