@@ -1,4 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections.Immutable;
+using System.Diagnostics.Tracing;
+using System.Security.Cryptography;
 while (true)
 {
     List<Note> strings = new List<Note>();
@@ -21,11 +23,11 @@ while (true)
 
     string? anywords;
 
-    Console.WriteLine("Выберите одно из действий:\n* Создать файл для заметок [0]\n* Добавить заметку [1] \n* Посмотреть все заметки [2]\n* Удалить заметку [3] \n* Выйти [5]");
+    Console.WriteLine("Выберите одно из действий:\n* Создать файл для заметок [0]\n* Добавить заметку [1] \n* Посмотреть все заметки [2]\n* Удалить заметку [3]\n* Поиск по ключевому слову [4]\n* Выйти [5]");
     int Choose = Convert.ToInt32(Console.ReadLine());
-    if (Choose == 4)
+    if (Choose == 5)
         break;
-    if (Choose >= 5)
+    if (Choose >= 6)
         Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
         
 
@@ -74,6 +76,19 @@ while (true)
             else
             Console.WriteLine("Заметка с таким ID не найдена");
             File.WriteAllLines(filePath, strings.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+            break;
+        case 4:
+            Console.WriteLine("Введите ключевое слово для поиска: ");
+            string? keyword = Console.ReadLine();
+            var SearchWord = strings.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+            Console.WriteLine("Все найденные совпадения");
+            foreach (var word in SearchWord)
+            {
+                Console.WriteLine("----------");
+                Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
+                Console.WriteLine("----------");
+            }
+
             break;
     }
 }
