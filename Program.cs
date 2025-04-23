@@ -1,4 +1,7 @@
-﻿NoteManager manager = new NoteManager();
+﻿using System.IO.Enumeration;
+using System.Text.Json;
+
+NoteManager manager = new NoteManager();
 manager.LoadFromFile();
 
 while (true)
@@ -16,7 +19,7 @@ while (true)
         break;
     if (Choose >= 7)
         Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
-        
+
 
     switch (Choose)
     {
@@ -30,7 +33,6 @@ while (true)
             manager.ShowAllNotes();
             break;
         case 3: // Удалить заявку
-
             manager.DeleteNotes();
             break;
         case 4: //Поиск
@@ -42,44 +44,38 @@ while (true)
     }
 }
 
-
-
 class NoteManager
 {
     private Dictionary<int, Note> strings = new Dictionary<int, Note>();
-    private string filePath;
-    public void LoadFromFile()
+    private static string fileName = "notes.json";
+    private string? filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), fileName);
+    public void LoadFromFile() //Загрузка файла
     {
-        string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        string fileName = "txt.txt";
-        filePath = Path.Combine(MyDocuments, fileName);
-
-        if (File.Exists(filePath))
+        string json = File.Exists(filePath) ? File.ReadAllText(filePath) : "";
+        if (!string.IsNullOrEmpty(json))
         {
-            strings = File.ReadLines(filePath).Select(line =>
-            {
-                var parts = line.Split('|');
-                int id = int.Parse(parts[0]);
-                string text = parts[1];
-                DateTime date = DateTime.Parse(parts[2]);
-                return new Note(id, text, date);
-            }).ToDictionary(note => note.ID);
+            var noteList = JsonSerializer.Deserialize<List<Note>>(json);
+            strings = noteList.ToDictionary(note => note.ID);
         }
     }
-    public void CreateFileNote()
+    public void CreateFileNote() // Создание файла
     {
-        using (File.Create(filePath)) { }
+
+        filePath = Path.Combine(filePath, fileName);
+        File.Create(filePath);
     }
     public void AddNotes() // Добавить заметку
     {
         Console.WriteLine("Оставьте заметку");
         string? anywords = Console.ReadLine();
+
         int newId = strings.Any() ? strings.Keys.Max() + 1 : 1;
         Note newNote = new Note(newId, anywords, DateTime.Now);
         strings.Add(newId, newNote);
         try
         {
-            File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+            string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
             Console.WriteLine("*\nЗаметка успешно создана\n*\n");
         }
         catch (IOException ex)
@@ -87,7 +83,6 @@ class NoteManager
             Console.WriteLine($"Ошибка при записи: {ex.Message}");
         }
     }
-
     public void ShowAllNotes() // Посмотреть все заметки
     {
         if (strings == null || strings.Count == 0)
