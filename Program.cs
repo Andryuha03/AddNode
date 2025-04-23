@@ -6,7 +6,7 @@ manager.LoadFromFile();
 
 while (true)
 {
-    Console.WriteLine("Выберите одно из действий:" +
+    Console.WriteLine("\nВыберите одно из действий:" +
         "\n* Создать файл для заметок [0]" +
         "\n* Добавить заметку [1] " +
         "\n* Посмотреть все заметки [2]" +
@@ -19,7 +19,6 @@ while (true)
         break;
     if (Choose >= 7)
         Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
-
 
     switch (Choose)
     {
@@ -49,22 +48,33 @@ class NoteManager
     private Dictionary<int, Note> strings = new Dictionary<int, Note>();
     private static string fileName = "notes.json";
     private string? filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), fileName);
-    public void LoadFromFile() //Загрузка файла
+
+    public void LoadFromFile() //Загрузка файла +
     {
-        string json = File.Exists(filePath) ? File.ReadAllText(filePath) : "";
-        if (!string.IsNullOrEmpty(json))
+        if (File.Exists(filePath))
         {
-            var noteList = JsonSerializer.Deserialize<List<Note>>(json);
-            strings = noteList.ToDictionary(note => note.ID);
+            string json = File.ReadAllText(filePath);
+            if (!string.IsNullOrEmpty(json))
+            {
+                var noteList = JsonSerializer.Deserialize<List<Note>>(json);
+                strings = noteList.ToDictionary(note => note.ID);
+            }
         }
     }
-    public void CreateFileNote() // Создание файла
+    public void CreateFileNote() // Создание файла +
     {
-
-        filePath = Path.Combine(filePath, fileName);
-        File.Create(filePath);
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            File.Create(filePath);
+            File.WriteAllText(filePath, "[]");
+        }
+        else
+        {
+            strings.Clear();
+            File.WriteAllText(filePath, "[]");
+        }
     }
-    public void AddNotes() // Добавить заметку
+    public void AddNotes() // Добавить заметку +
     {
         Console.WriteLine("Оставьте заметку");
         string? anywords = Console.ReadLine();
@@ -76,27 +86,27 @@ class NoteManager
         {
             string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
-            Console.WriteLine("*\nЗаметка успешно создана\n*\n");
+            Console.WriteLine("* Заметка успешно создана *\n");
         }
         catch (IOException ex)
         {
             Console.WriteLine($"Ошибка при записи: {ex.Message}");
         }
     }
-    public void ShowAllNotes() // Посмотреть все заметки
+    public void ShowAllNotes() // Посмотреть все заметки +
     {
         if (strings == null || strings.Count == 0)
-        {
             Console.WriteLine("Тут пока пусто...\n");
-        }
-        foreach (var i in strings.Values)
+        else
         {
-            Console.WriteLine("----------");
-            Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
-            Console.WriteLine("----------");
+            foreach (var n in strings.Values)
+            {
+                Console.WriteLine("--------------");
+                Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+            }
         }
     }
-    public void DeleteNotes() // Удалить заявку
+    public void DeleteNotes() // Удалить заявку 
     {
         if (strings.Count == 0)
         {
@@ -112,7 +122,8 @@ class NoteManager
         else
             Console.WriteLine("Заметка с таким ID не найдена");
 
-        File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+        string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
     }
     public void SearchNotes()//Поиск
     {
@@ -162,7 +173,8 @@ class NoteManager
                 Searchid.Text = editText;
                 Searchid.DateAt = DateTime.Now;
 
-                File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+                string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
 
                 Console.WriteLine("Запись была успешно измененна!");
             }
@@ -182,6 +194,8 @@ public class Note
     public int ID { get; set; }
     public string Text { get; set; }
     public DateTime DateAt { get; set; }
+
+    public Note() { }
 
     public Note(int id, string text, DateTime date)
     {
