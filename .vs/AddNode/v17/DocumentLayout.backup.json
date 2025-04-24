@@ -3,11 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\zverev_ad\\source\\repos\\AddNode\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\zverev_ad\\Documents\\notes.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{5351B2B8-9017-4B28-A7F9-25D1DB8C0D8C}|AddNode.csproj|c:\\users\\zverev_ad\\source\\repos\\addnode\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5351B2B8-9017-4B28-A7F9-25D1DB8C0D8C}|AddNode.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\zverev_ad\\Documents\\notes.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -17,11 +17,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "notes.json",
               "DocumentMoniker": "C:\\Users\\zverev_ad\\Documents\\notes.json",
               "RelativeDocumentMoniker": "..\\..\\..\\Documents\\notes.json",
@@ -34,13 +34,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\zverev_ad\\source\\repos\\AddNode\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\zverev_ad\\source\\repos\\AddNode\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAGgAAAAAAAAAAAAIwH0AAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\zverev_ad\\source\\repos\\AddNode\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAmwK8AAAB1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-16T06:23:51.352Z",
               "EditorCaption": ""

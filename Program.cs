@@ -49,7 +49,7 @@ class NoteManager
     private static string fileName = "notes.json";
     private string? filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), fileName);
 
-    public void LoadFromFile() //Загрузка файла +
+    public void LoadFromFile() //Загрузка файла 
     {
         if (File.Exists(filePath))
         {
@@ -61,7 +61,7 @@ class NoteManager
             }
         }
     }
-    public void CreateFileNote() // Создание файла +
+    public void CreateFileNote() // Создание файла 
     {
         if (!string.IsNullOrEmpty(filePath))
         {
@@ -74,7 +74,7 @@ class NoteManager
             File.WriteAllText(filePath, "[]");
         }
     }
-    public void AddNotes() // Добавить заметку +
+    public void AddNotes() // Добавить заметку
     {
         Console.WriteLine("Оставьте заметку");
         string? anywords = Console.ReadLine();
@@ -84,8 +84,7 @@ class NoteManager
         strings.Add(newId, newNote);
         try
         {
-            string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
+            SaveToFile();
             Console.WriteLine("* Заметка успешно создана *\n");
         }
         catch (IOException ex)
@@ -93,7 +92,7 @@ class NoteManager
             Console.WriteLine($"Ошибка при записи: {ex.Message}");
         }
     }
-    public void ShowAllNotes() // Посмотреть все заметки +
+    public void ShowAllNotes() // Посмотреть все заметки
     {
         if (strings == null || strings.Count == 0)
             Console.WriteLine("Тут пока пусто...\n");
@@ -115,15 +114,14 @@ class NoteManager
         }
         Console.WriteLine("Выберите номер заметки для удаления");
         int ChooseDel = int.Parse(Console.ReadLine());
-        Note noteToRemove = strings.Values.FirstOrDefault(n => n.ID == ChooseDel);
 
         if (strings.Remove(ChooseDel))
+        {
+            SaveToFile();
             Console.WriteLine("Заметка удалена");
+        }
         else
             Console.WriteLine("Заметка с таким ID не найдена");
-
-        string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(filePath, json);
     }
     public void SearchNotes()//Поиск
     {
@@ -162,6 +160,7 @@ class NoteManager
         {
             Console.WriteLine("Для изменения записи введите её ID");
             int idKeyWord = int.Parse(Console.ReadLine());
+
             Note Searchid = strings.Values.FirstOrDefault(n => n.ID == idKeyWord);
             if (Searchid != null)
             {
@@ -173,8 +172,7 @@ class NoteManager
                 Searchid.Text = editText;
                 Searchid.DateAt = DateTime.Now;
 
-                string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(filePath, json);
+                SaveToFile();
 
                 Console.WriteLine("Запись была успешно измененна!");
             }
@@ -186,6 +184,11 @@ class NoteManager
             Console.WriteLine("Нужно писать ID арабскими цифрами");
         }
         ;
+    }
+    private void SaveToFile()
+    {
+        string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
     }
 
 }
