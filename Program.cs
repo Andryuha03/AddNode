@@ -13,12 +13,13 @@ while (true)
         "\n* Удалить заметку [3]" +
         "\n* Поиск по ключевому слову [4]" +
         "\n* Редактировать заметку [5]" +
-        "\n* Выйти [6]");
+        "\n* Сортировать заметки [6]" +
+        "\n* Выйти [7]");
     int Choose = Convert.ToInt32(Console.ReadLine());
-    if (Choose == 6)
+    if (Choose == 8)
         break;
-    if (Choose >= 7)
-        Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
+    if (Choose >= 9)
+        Console.WriteLine("Ты обезьяна? Сказано выбрато только из восьми!\n");
 
     switch (Choose)
     {
@@ -39,6 +40,35 @@ while (true)
             break;
         case 5: // Редактирование
             manager.EditNotes();
+            break;
+        case 6:
+            Console.WriteLine("\nВыберите одно из действий:" +
+        "\n* Сначала новые[0]" +
+        "\n* Сначала старые [1]" +
+        "\n* Выйти [2]");
+            Choose = Convert.ToInt32(Console.ReadLine());
+            if (Choose == 2)
+                break;
+            else if (Choose >= 3)
+                Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
+            else
+            {
+                switch (Choose)
+                {
+                    case 0:
+                        manager.SortNoteByDateNew();
+                        break;
+                    case 1:
+                        manager.SortNoteByDateOld();
+                        break;
+                }
+            }
+            break;
+        case 7:
+
+            break;
+        case 8:
+
             break;
     }
 }
@@ -185,12 +215,35 @@ class NoteManager
         }
         ;
     }
+    public void SortNoteByDateOld()
+    {
+        var sorter = strings.Values.OrderByDescending(n => n.DateAt);
+        
+        foreach (var n in sorter)
+        {
+            Note srt = new Note(n.ID, n.Text, n.DateAt);
+            Console.WriteLine("--------------");
+            Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+        }
+        SaveToFile();
+    }
+    public void SortNoteByDateNew()
+    {
+        var sorter = strings.Values.OrderBy(n => n.DateAt);
+        foreach (var n in sorter)
+        {
+            Console.WriteLine("--------------");
+            Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+        }
+
+    }
+
     private void SaveToFile()
     {
         string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
     }
-
+    
 }
 public class Note
 {
