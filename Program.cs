@@ -1,22 +1,25 @@
-﻿NoteManager manager = new NoteManager();
+﻿using System.IO.Enumeration;
+using System.Text.Json;
+
+NoteManager manager = new NoteManager();
 manager.LoadFromFile();
 
 while (true)
 {
-    Console.WriteLine("Выберите одно из действий:" +
+    Console.WriteLine("\nВыберите одно из действий:" +
         "\n* Создать файл для заметок [0]" +
         "\n* Добавить заметку [1] " +
         "\n* Посмотреть все заметки [2]" +
         "\n* Удалить заметку [3]" +
         "\n* Поиск по ключевому слову [4]" +
         "\n* Редактировать заметку [5]" +
-        "\n* Выйти [6]");
+        "\n* Сортировать заметки [6]" +
+        "\n* Выйти [7]");
     int Choose = Convert.ToInt32(Console.ReadLine());
-    if (Choose == 6)
+    if (Choose == 8)
         break;
-    if (Choose >= 7)
-        Console.WriteLine("Ты обезьяна? Сказано выбрато только из четырех!\n");
-        
+    if (Choose >= 9)
+        Console.WriteLine("Ты обезьяна? Сказано выбрато только из восьми!\n");
 
     switch (Choose)
     {
@@ -30,7 +33,6 @@ while (true)
             manager.ShowAllNotes();
             break;
         case 3: // Удалить заявку
-
             manager.DeleteNotes();
             break;
         case 4: //Поиск
@@ -39,69 +41,101 @@ while (true)
         case 5: // Редактирование
             manager.EditNotes();
             break;
+        case 6:
+            Console.WriteLine("\nВыберите одно из действий:" +
+        "\n* Сначала новые[0]" +
+        "\n* Сначала старые [1]" +
+        "\n* Выйти [2]");
+            Choose = Convert.ToInt32(Console.ReadLine());
+            if (Choose == 2)
+                break;
+            else if (Choose >= 3)
+                Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
+            else
+            {
+                switch (Choose)
+                {
+                    case 0:
+                        manager.SortNoteByDateNew();
+                        break;
+                    case 1:
+                        manager.SortNoteByDateOld();
+                        break;
+                }
+            }
+            break;
+        case 7:
+
+            break;
+        case 8:
+
+            break;
     }
 }
-
-
 
 class NoteManager
 {
     private Dictionary<int, Note> strings = new Dictionary<int, Note>();
-    private string filePath;
-    public void LoadFromFile()
-    {
-        string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        string fileName = "txt.txt";
-        filePath = Path.Combine(MyDocuments, fileName);
+    private static string fileName = "notes.json";
+    private string? filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), fileName);
 
+    public void LoadFromFile() //Загрузка файла 
+    {
         if (File.Exists(filePath))
         {
-            strings = File.ReadLines(filePath).Select(line =>
+            string json = File.ReadAllText(filePath);
+            if (!string.IsNullOrEmpty(json))
             {
-                var parts = line.Split('|');
-                int id = int.Parse(parts[0]);
-                string text = parts[1];
-                DateTime date = DateTime.Parse(parts[2]);
-                return new Note(id, text, date);
-            }).ToDictionary(note => note.ID);
+                var noteList = JsonSerializer.Deserialize<List<Note>>(json);
+                strings = noteList.ToDictionary(note => note.ID);
+            }
         }
     }
-    public void CreateFileNote()
+    public void CreateFileNote() // Создание файла 
     {
-        using (File.Create(filePath)) { }
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            File.Create(filePath);
+            File.WriteAllText(filePath, "[]");
+        }
+        else
+        {
+            strings.Clear();
+            File.WriteAllText(filePath, "[]");
+        }
     }
     public void AddNotes() // Добавить заметку
     {
         Console.WriteLine("Оставьте заметку");
         string? anywords = Console.ReadLine();
+
         int newId = strings.Any() ? strings.Keys.Max() + 1 : 1;
         Note newNote = new Note(newId, anywords, DateTime.Now);
         strings.Add(newId, newNote);
         try
         {
-            File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
-            Console.WriteLine("*\nЗаметка успешно создана\n*\n");
+            SaveToFile();
+            Console.WriteLine("* Заметка успешно создана *\n");
         }
         catch (IOException ex)
         {
             Console.WriteLine($"Ошибка при записи: {ex.Message}");
         }
     }
-
     public void ShowAllNotes() // Посмотреть все заметки
     {
         if (strings == null || strings.Count == 0)
-        {
             Console.WriteLine("Тут пока пусто...\n");
-        }
-        foreach (var i in strings.Values)
+        else
         {
-            Console.WriteLine("----------");
-            Console.WriteLine($"{i.ID}. {i.Text} ({i.DateAt})");
-            Console.WriteLine("----------");
+            foreach (var n in strings.Values)
+            {
+                Console.WriteLine("--------------");
+                Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+            }
         }
     }
-    public void DeleteNotes() // Удалить заявку
+    public void DeleteNotes() // Удалить заявку 
     {
         if (strings.Count == 0)
         {
@@ -110,14 +144,14 @@ class NoteManager
         }
         Console.WriteLine("Выберите номер заметки для удаления");
         int ChooseDel = int.Parse(Console.ReadLine());
-        Note noteToRemove = strings.Values.FirstOrDefault(n => n.ID == ChooseDel);
 
         if (strings.Remove(ChooseDel))
+        {
+            SaveToFile();
             Console.WriteLine("Заметка удалена");
+        }
         else
             Console.WriteLine("Заметка с таким ID не найдена");
-
-        File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
     }
     public void SearchNotes()//Поиск
     {
@@ -156,6 +190,7 @@ class NoteManager
         {
             Console.WriteLine("Для изменения записи введите её ID");
             int idKeyWord = int.Parse(Console.ReadLine());
+
             Note Searchid = strings.Values.FirstOrDefault(n => n.ID == idKeyWord);
             if (Searchid != null)
             {
@@ -167,7 +202,7 @@ class NoteManager
                 Searchid.Text = editText;
                 Searchid.DateAt = DateTime.Now;
 
-                File.WriteAllLines(filePath, strings.Values.Select(n => $"{n.ID}|{n.Text}|{n.DateAt}"));
+                SaveToFile();
 
                 Console.WriteLine("Запись была успешно измененна!");
             }
@@ -180,13 +215,45 @@ class NoteManager
         }
         ;
     }
+    public void SortNoteByDateOld()
+    {
+        var sorter = strings.Values.OrderByDescending(n => n.DateAt);
+        
+        foreach (var n in sorter)
+        {
+            Note srt = new Note(n.ID, n.Text, n.DateAt);
+            Console.WriteLine("--------------");
+            Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+        }
+        SaveToFile();
+    }
+    public void SortNoteByDateNew()
+    {
+        var sorter = strings.Values.OrderBy(n => n.DateAt);
+        foreach (var n in sorter)
+        {
+            Note srt = new Note(n.ID, n.Text, n.DateAt);
+            Console.WriteLine("--------------");
+            Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
+        }
+        SaveToFile();
 
+    }
+
+    private void SaveToFile()
+    {
+        string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
+    }
+    
 }
 public class Note
 {
     public int ID { get; set; }
     public string Text { get; set; }
     public DateTime DateAt { get; set; }
+
+    public Note() { }
 
     public Note(int id, string text, DateTime date)
     {
