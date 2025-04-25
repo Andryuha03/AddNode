@@ -103,28 +103,43 @@ class NoteManager
 
     public void LoadFromFile() //Загрузка файла 
     {
-        if (File.Exists(filePath))
+        try
         {
-            string json = File.ReadAllText(filePath);
-            if (!string.IsNullOrEmpty(json))
+            if (File.Exists(filePath))
             {
-                var noteList = JsonSerializer.Deserialize<List<Note>>(json);
-                strings = noteList.ToDictionary(note => note.ID);
+                string json = File.ReadAllText(filePath);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var noteList = JsonSerializer.Deserialize<List<Note>>(json);
+                    strings = noteList.ToDictionary(note => note.ID);
+                }
             }
         }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Ошибка при открытии файла: {ex.Message}");
+        };
     }
     public void CreateFileNote() // Создание файла 
     {
-        if (!string.IsNullOrEmpty(filePath))
+        try
         {
-            File.Create(filePath);
-            File.WriteAllText(filePath, "[]");
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                File.Create(filePath);
+                File.WriteAllText(filePath, "[]");
+            }
+            else
+            {
+                strings.Clear();
+                File.WriteAllText(filePath, "[]");
+            }
         }
-        else
+        catch (IOException ex)
         {
-            strings.Clear();
-            File.WriteAllText(filePath, "[]");
+            Console.WriteLine($"Ошибка при создании файла: {ex.Message}");
         }
+        ;
     }
     public void AddNotes() // Добавить заметку
     {
