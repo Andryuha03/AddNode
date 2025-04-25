@@ -11,68 +11,90 @@ while (true)
         "\n* Добавить заметку [1] " +
         "\n* Посмотреть все заметки [2]" +
         "\n* Удалить заметку [3]" +
-        "\n* Поиск по ключевому слову [4]" +
+        "\n* Поиск [4]" +
         "\n* Редактировать заметку [5]" +
         "\n* Сортировать заметки [6]" +
         "\n* Выйти [7]");
-    int Choose = Convert.ToInt32(Console.ReadLine());
-    if (Choose == 8)
-        break;
-    if (Choose >= 9)
-        Console.WriteLine("Ты обезьяна? Сказано выбрато только из восьми!\n");
-
-    switch (Choose)
+    try
     {
-        case 0:
-            manager.CreateFileNote();
+        int Choose = Convert.ToInt32(Console.ReadLine());
+        if (Choose == 8)
             break;
-        case 1: // Добавить заметку
-            manager.AddNotes();
-            break;
-        case 2: // Посмотреть все заметки
-            manager.ShowAllNotes();
-            break;
-        case 3: // Удалить заявку
-            manager.DeleteNotes();
-            break;
-        case 4: //Поиск
-            manager.SearchNotes();
-            break;
-        case 5: // Редактирование
-            manager.EditNotes();
-            break;
-        case 6:
-            Console.WriteLine("\nВыберите одно из действий:" +
-        "\n* Сначала новые[0]" +
-        "\n* Сначала старые [1]" +
-        "\n* Выйти [2]");
-            Choose = Convert.ToInt32(Console.ReadLine());
-            if (Choose == 2)
+        if (Choose >= 9)
+            Console.WriteLine("Ты обезьяна? Сказано выбрато только из восьми!\n");
+
+        switch (Choose)
+        {
+            case 0:
+                manager.CreateFileNote();
                 break;
-            else if (Choose >= 3)
-                Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
-            else
-            {
-                switch (Choose)
+            case 1: // Добавить заметку
+                manager.AddNotes();
+                break;
+            case 2: // Посмотреть все заметки
+                manager.ShowAllNotes();
+                break;
+            case 3: // Удалить заявку
+                manager.DeleteNotes();
+                break;
+            case 4: //Поиск
+                Console.WriteLine("\nВыберите одно из действий:" +
+                "\n* По ключевому слову[0]" +
+                "\n* По дате [1]" +
+                "\n* Выйти [2]");
+                Choose = Convert.ToInt32(Console.ReadLine());
+                if (Choose == 2)
+                    break;
+                else if (Choose >= 3)
+                    Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
+                else
                 {
-                    case 0:
-                        manager.SortNoteByDateNew();
-                        break;
-                    case 1:
-                        manager.SortNoteByDateOld();
-                        break;
+                    switch (Choose)
+                    {
+                        case 0:
+                            manager.SearchNotes();
+                            break;
+                        case 1:
+                            manager.SearchDate();
+                            break;
+                    }
+
                 }
-            }
-            break;
-        case 7:
-
-            break;
-        case 8:
-
-            break;
+                break;
+            case 5: // Редактирование
+                manager.EditNotes();
+                break;
+            case 6:
+                Console.WriteLine("\nВыберите одно из действий:" +
+            "\n* Сначала новые[0]" +
+            "\n* Сначала старые [1]" +
+            "\n* Выйти [2]");
+                Choose = Convert.ToInt32(Console.ReadLine());
+                if (Choose == 2)
+                    break;
+                else if (Choose >= 3)
+                    Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
+                else
+                {
+                    switch (Choose)
+                    {
+                        case 0:
+                            manager.SortNoteByDateNew();
+                            break;
+                        case 1:
+                            manager.SortNoteByDateOld();
+                            break;
+                    }
+                }
+                break;
+        }
     }
-}
-
+    catch(IOException ex)
+    {
+        Console.WriteLine($"Завязывай писать всякое, а то ошибка вылезла: {ex.Message}");
+    }
+    ;
+    }
 class NoteManager
 {
     private Dictionary<int, Note> strings = new Dictionary<int, Note>();
@@ -178,6 +200,34 @@ class NoteManager
                 Console.WriteLine("----------");
             }
         }
+    }
+    public void SearchDate()
+    {
+        if(strings.Count == 0)
+            { Console.WriteLine("Заметок нет");return; }
+        Console.WriteLine("Введите дату");
+        string input = Console.ReadLine();
+        DateTime? keydate = null;
+        if (DateTime.TryParse(input, out DateTime parsedDate))
+        {
+            keydate = parsedDate;
+            var SearchDate = strings.Values.Where(n => n.DateAt.Date == parsedDate.Date).ToList();
+            if (SearchDate.Count == 0)
+                Console.WriteLine("Заметок на эту дату нет");
+            else
+            {
+                foreach (var date in SearchDate)
+                {
+                    Console.WriteLine("----------");
+                    Console.WriteLine($"{date.ID}. {date.Text} ({date.DateAt})");
+                    Console.WriteLine("----------");
+                }
+            }
+        }
+        else
+            Console.WriteLine("Некорректная введена дата");
+
+
     }
     public void EditNotes() // Редактирование
     {

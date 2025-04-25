@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AddNode")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+26f439f1f35aea8e4f0f261f6b00baca5fc78021")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+769c1717e1f0814e6948a3e340a3ae0cb2b66b2f")]
 [assembly: System.Reflection.AssemblyProductAttribute("AddNode")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AddNode")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
