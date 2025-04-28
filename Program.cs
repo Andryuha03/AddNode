@@ -19,10 +19,10 @@ while (true)
     try
     {
         int Choose = Convert.ToInt32(Console.ReadLine());
-        if (Choose == 8)
+        if (Choose == 7)
             break;
-        if (Choose >= 9)
-            Console.WriteLine("Ты обезьяна? Сказано выбрато только из восьми!\n");
+        if (Choose >= 8)
+            Console.WriteLine("Ты обезьяна? Сказано выбрато только из семи!\n");
 
         switch (Choose)
         {
@@ -146,6 +146,10 @@ class NoteManager
         Console.WriteLine("Оставьте заметку (или введите 'q' для выхода в меню)");
         string? anywords = Console.ReadLine();
         qExit(anywords);
+        if (string.IsNullOrWhiteSpace(anywords)) {
+            Console.WriteLine("Поле с заметкой не должно быть пустым");
+            return;
+        }
         int newId = strings.Any() ? strings.Keys.Max() + 1 : 1;
         Note newNote = new Note(newId, anywords, DateTime.Now);
         strings.Add(newId, newNote);
