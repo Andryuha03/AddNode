@@ -1,4 +1,5 @@
 ﻿using System.IO.Enumeration;
+using System.Linq.Expressions;
 using System.Text.Json;
 
 NoteManager manager = new NoteManager();
@@ -89,12 +90,11 @@ while (true)
                 break;
         }
     }
-    catch(IOException ex)
+    catch (IOException ex)
     {
         Console.WriteLine($"Завязывай писать всякое, а то ошибка вылезла: {ex.Message}");
     }
-    ;
-    }
+}
 class NoteManager
 {
     private Dictionary<int, Note> strings = new Dictionary<int, Note>();
@@ -143,9 +143,9 @@ class NoteManager
     }
     public void AddNotes() // Добавить заметку
     {
-        Console.WriteLine("Оставьте заметку");
+        Console.WriteLine("Оставьте заметку (или введите 'q' для выхода в меню)");
         string? anywords = Console.ReadLine();
-
+        qExit(anywords);
         int newId = strings.Any() ? strings.Keys.Max() + 1 : 1;
         Note newNote = new Note(newId, anywords, DateTime.Now);
         strings.Add(newId, newNote);
@@ -179,17 +179,27 @@ class NoteManager
             Console.WriteLine("Нет заметок для поиска");
             return;
         }
-        Console.WriteLine("Выберите номер заметки для удаления");
-        int ChooseDel = int.Parse(Console.ReadLine());
+        Console.WriteLine("Выберите номер заметки для удаления (или введите 'q' для выхода в меню)");
 
-        if (strings.Remove(ChooseDel))
+        string ChooseID = Console.ReadLine();
+        qExit(ChooseID);
+        try
         {
-            SaveToFile();
-            Console.WriteLine("Заметка удалена");
+            int ChooseDel = Convert.ToInt32(ChooseID);
+            if (strings.Remove(ChooseDel))
+            {
+                SaveToFile();
+                Console.WriteLine("Заметка удалена");
+            }
+            else
+                Console.WriteLine("Заметка с таким ID не найдена");
         }
-        else
-            Console.WriteLine("Заметка с таким ID не найдена");
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка: {ex.Message}");
+        }
     }
+
     public void SearchNotes()//Поиск
     {
         if (strings.Count == 0)
@@ -197,8 +207,9 @@ class NoteManager
             Console.WriteLine("Нет заметок для поиска");
             return;
         }
-        Console.WriteLine("Введите ключевое слово для поиска: ");
+        Console.WriteLine(@"Введите ключевое слово для поиска (или введите 'q' для выхода в меню)");
         string? keyword = Console.ReadLine();
+        qExit(keyword);
         var SearchWord = strings.Values.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
         if (SearchWord.Count == 0)
         {
@@ -218,32 +229,39 @@ class NoteManager
     }
     public void SearchDate()
     {
-        if(strings.Count == 0)
-            { Console.WriteLine("Заметок нет");return; }
-        Console.WriteLine("Введите дату");
-        string input = Console.ReadLine();
-        DateTime? keydate = null;
-        if (DateTime.TryParse(input, out DateTime parsedDate))
-        {
-            keydate = parsedDate;
-            var SearchDate = strings.Values.Where(n => n.DateAt.Date == parsedDate.Date).ToList();
-            if (SearchDate.Count == 0)
-                Console.WriteLine("Заметок на эту дату нет");
-            else
+        if (strings.Count == 0)
+        { Console.WriteLine("Заметок нет"); return; }
+        Console.WriteLine("Введите дату (или введите 'q' для выхода в меню)");
+        string? input = Console.ReadLine();
+        qExit(input);
+        try {
+            DateTime? keydate = null;
+            if (DateTime.TryParse(input, out DateTime parsedDate))
             {
-                foreach (var date in SearchDate)
+                keydate = parsedDate;
+                var SearchDate = strings.Values.Where(n => n.DateAt.Date == parsedDate.Date).ToList();
+                if (SearchDate.Count == 0)
+                    Console.WriteLine("Заметок на эту дату нет");
+                else
                 {
-                    Console.WriteLine("----------");
-                    Console.WriteLine($"{date.ID}. {date.Text} ({date.DateAt})");
-                    Console.WriteLine("----------");
+                    foreach (var date in SearchDate)
+                    {
+                        Console.WriteLine("----------");
+                        Console.WriteLine($"{date.ID}. {date.Text} ({date.DateAt})");
+                        Console.WriteLine("----------");
+                    }
                 }
             }
+            else
+                Console.WriteLine("Некорректная введена дата");
+
+
         }
-        else
-            Console.WriteLine("Некорректная введена дата");
-
-
+        catch (Exception ex){
+            Console.WriteLine($"Ошибка в поиске: {ex.Message}");
+        } 
     }
+   
     public void EditNotes() // Редактирование
     {
         if (strings.Count == 0)
@@ -251,11 +269,12 @@ class NoteManager
             Console.WriteLine("Нет заметок для изменения");
             return;
         }
+        Console.WriteLine("Для изменения записи введите её ID (или введите 'q' для выхода в меню)");
+        string? KeyWord = Console.ReadLine();
+        qExit(KeyWord);
         try
         {
-            Console.WriteLine("Для изменения записи введите её ID");
-            int idKeyWord = int.Parse(Console.ReadLine());
-
+            int idKeyWord = int.Parse(KeyWord);
             Note Searchid = strings.Values.FirstOrDefault(n => n.ID == idKeyWord);
             if (Searchid != null)
             {
@@ -274,11 +293,11 @@ class NoteManager
             else
                 Console.WriteLine("Запись с таким ID не найдена");
         }
-        catch
+        catch(Exception ex)
         {
-            Console.WriteLine("Нужно писать ID арабскими цифрами");
+            Console.WriteLine($"Ошибка при изменении:{ex.Message}");
         }
-        ;
+        
     }
     public void SortNoteByDateOld()
     {
@@ -309,6 +328,11 @@ class NoteManager
     {
         string json = JsonSerializer.Serialize(strings.Values, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
+    }
+    private void qExit(string q)
+    {
+        if (q == "q" || q == "Q")
+            return;
     }
     
 }
