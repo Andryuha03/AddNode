@@ -1,6 +1,4 @@
-﻿using System.IO.Enumeration;
-using System.Linq.Expressions;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 NoteManager manager = new NoteManager();
 manager.LoadFromFile();
@@ -22,7 +20,7 @@ while (true)
         if (Choose == 7)
             break;
         if (Choose >= 8)
-            Console.WriteLine("Ты обезьяна? Сказано выбрато только из семи!\n");
+            manager.PrintError("Ты обезьяна? Сказано выбрато только из восьми!\n");
 
         switch (Choose)
         {
@@ -74,7 +72,7 @@ while (true)
                 if (Choose == 2)
                     break;
                 else if (Choose >= 3)
-                    Console.WriteLine("Ты обезьяна? Сказано выбрато только из трех!\n");
+                    manager.PrintError("Ты обезьяна? Сказано выбрато только из трех!\n");
                 else
                 {
                     switch (Choose)
@@ -90,10 +88,11 @@ while (true)
                 break;
         }
     }
-    catch (IOException ex)
+    catch (FormatException)
     {
-        Console.WriteLine($"Завязывай писать всякое, а то ошибка вылезла: {ex.Message}");
+        manager.PrintError($"Завязывай писать всякое, а то ошибка вылезла, от тебя требуется циферка");
     }
+
 }
 class NoteManager
 {
@@ -117,8 +116,9 @@ class NoteManager
         }
         catch (IOException ex)
         {
-            Console.WriteLine($"Ошибка при открытии файла: {ex.Message}");
-        };
+            PrintError($"Ошибка при открытии файла: {ex.Message}");
+        }
+        ;
     }
     public void CreateFileNote() // Создание файла 
     {
@@ -137,7 +137,7 @@ class NoteManager
         }
         catch (IOException ex)
         {
-            Console.WriteLine($"Ошибка при создании файла: {ex.Message}");
+            PrintError($"Ошибка при создании файла: {ex.Message}");
         }
         ;
     }
@@ -146,8 +146,9 @@ class NoteManager
         Console.WriteLine("Оставьте заметку (или введите 'q' для выхода в меню)");
         string? anywords = Console.ReadLine();
         qExit(anywords);
-        if (string.IsNullOrWhiteSpace(anywords)) {
-            Console.WriteLine("Поле с заметкой не должно быть пустым");
+        if (string.IsNullOrWhiteSpace(anywords))
+        {
+            PrintError("Поле с заметкой не должно быть пустым");
             return;
         }
         int newId = strings.Any() ? strings.Keys.Max() + 1 : 1;
@@ -156,22 +157,22 @@ class NoteManager
         try
         {
             SaveToFile();
-            Console.WriteLine("* Заметка успешно создана *\n");
+            PrintSuccess("* Заметка успешно создана *\n");
         }
         catch (IOException ex)
         {
-            Console.WriteLine($"Ошибка при записи: {ex.Message}");
+            PrintError($"Ошибка при записи: {ex.Message}");
         }
     }
     public void ShowAllNotes() // Посмотреть все заметки
     {
         if (strings == null || strings.Count == 0)
-            Console.WriteLine("Тут пока пусто...\n");
+            PrintInfo("Тут пока пусто...\n");
         else
         {
             foreach (var n in strings.Values)
             {
-                Console.WriteLine("--------------");
+                PrintInfo("--------------");
                 Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
             }
         }
@@ -180,7 +181,7 @@ class NoteManager
     {
         if (strings.Count == 0)
         {
-            Console.WriteLine("Нет заметок для поиска");
+            PrintInfo("Нет заметок для поиска");
             return;
         }
         Console.WriteLine("Выберите номер заметки для удаления (или введите 'q' для выхода в меню)");
@@ -193,14 +194,14 @@ class NoteManager
             if (strings.Remove(ChooseDel))
             {
                 SaveToFile();
-                Console.WriteLine("Заметка удалена");
+                PrintSuccess("Заметка удалена");
             }
             else
-                Console.WriteLine("Заметка с таким ID не найдена");
+                PrintError("Заметка с таким ID не найдена");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка: {ex.Message}");
+            PrintError($"Ошибка: {ex.Message}");
         }
     }
 
@@ -208,69 +209,71 @@ class NoteManager
     {
         if (strings.Count == 0)
         {
-            Console.WriteLine("Нет заметок для поиска");
+            PrintInfo("Нет заметок для поиска");
             return;
         }
-        Console.WriteLine(@"Введите ключевое слово для поиска (или введите 'q' для выхода в меню)");
+        Console.WriteLine("Введите ключевое слово для поиска (или введите 'q' для выхода в меню)");
         string? keyword = Console.ReadLine();
         qExit(keyword);
         var SearchWord = strings.Values.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
         if (SearchWord.Count == 0)
         {
-            Console.WriteLine("Совпадений не найдено");
+            PrintError("Совпадений не найдено");
             return;
         }
         else
         {
-            Console.WriteLine("Все найденные совпадения");
+            PrintInfo("Все найденные совпадения");
             foreach (var word in SearchWord)
             {
-                Console.WriteLine("----------");
+                PrintInfo("----------");
                 Console.WriteLine($"{word.ID}. {word.Text} ({word.DateAt})");
-                Console.WriteLine("----------");
+                PrintInfo("----------");
             }
         }
     }
     public void SearchDate()
     {
         if (strings.Count == 0)
-        { Console.WriteLine("Заметок нет"); return; }
+        { PrintInfo("Заметок нет"); return; }
         Console.WriteLine("Введите дату (или введите 'q' для выхода в меню)");
         string? input = Console.ReadLine();
         qExit(input);
-        try {
+        try
+        {
             DateTime? keydate = null;
             if (DateTime.TryParse(input, out DateTime parsedDate))
             {
                 keydate = parsedDate;
                 var SearchDate = strings.Values.Where(n => n.DateAt.Date == parsedDate.Date).ToList();
                 if (SearchDate.Count == 0)
-                    Console.WriteLine("Заметок на эту дату нет");
+                    PrintError("Заметок на эту дату нет");
                 else
                 {
                     foreach (var date in SearchDate)
                     {
-                        Console.WriteLine("----------");
+                        PrintInfo("----------");
                         Console.WriteLine($"{date.ID}. {date.Text} ({date.DateAt})");
-                        Console.WriteLine("----------");
+                        PrintInfo("----------");
                     }
                 }
             }
             else
-                Console.WriteLine("Некорректная введена дата");
+                PrintError("Некорректная введена дата");
 
 
         }
-        catch (Exception ex){
-            Console.WriteLine($"Ошибка в поиске: {ex.Message}");
-        } 
+        catch (Exception ex)
+        {
+            PrintError($"Ошибка в поиске: {ex.Message}");
+        }
     }
-   
+
     public void EditNotes() // Редактирование
     {
         if (strings.Count == 0)
         {
-            Console.WriteLine("Нет заметок для изменения");
+            PrintInfo("Нет заметок для изменения");
             return;
         }
         Console.WriteLine("Для изменения записи введите её ID (или введите 'q' для выхода в меню)");
@@ -282,35 +285,35 @@ class NoteManager
             Note Searchid = strings.Values.FirstOrDefault(n => n.ID == idKeyWord);
             if (Searchid != null)
             {
-                Console.WriteLine("++++++++++");
+                PrintInfo("++++++++++");
                 Console.WriteLine($"{Searchid.ID}. {Searchid.Text} ({Searchid.DateAt})");
-                Console.WriteLine("++++++++++\n");
-                Console.WriteLine("Запись найдена, теперь можете внести изменение");
+                PrintInfo("++++++++++\n");
+                PrintSuccess("Запись найдена, теперь можете внести изменение");
                 string? editText = Console.ReadLine();
                 Searchid.Text = editText;
                 Searchid.DateAt = DateTime.Now;
 
                 SaveToFile();
 
-                Console.WriteLine("Запись была успешно измененна!");
+                PrintSuccess("Запись была успешно измененна!");
             }
             else
-                Console.WriteLine("Запись с таким ID не найдена");
+                PrintError("Запись с таким ID не найдена");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка при изменении:{ex.Message}");
+            PrintError($"Ошибка при изменении:{ex.Message}");
         }
-        
+
     }
     public void SortNoteByDateOld()
     {
         var sorter = strings.Values.OrderByDescending(n => n.DateAt);
-        
+
         foreach (var n in sorter)
         {
             Note srt = new Note(n.ID, n.Text, n.DateAt);
-            Console.WriteLine("--------------");
+            PrintInfo("--------------");
             Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
         }
         SaveToFile();
@@ -321,7 +324,7 @@ class NoteManager
         foreach (var n in sorter)
         {
             Note srt = new Note(n.ID, n.Text, n.DateAt);
-            Console.WriteLine("--------------");
+            PrintInfo("--------------");
             Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
         }
         SaveToFile();
@@ -338,7 +341,24 @@ class NoteManager
         if (q == "q" || q == "Q")
             return;
     }
-    
+    private void PrintSuccess(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
+    public void PrintError(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
+    private void PrintInfo(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
 }
 public class Note
 {
