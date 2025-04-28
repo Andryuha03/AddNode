@@ -2,7 +2,7 @@
 
 NoteManager manager = new NoteManager();
 manager.LoadFromFile();
-
+ShowLoadingAnimation("Загрузка приложения");
 while (true)
 {
     Console.WriteLine("\nВыберите одно из действий:" +
@@ -20,8 +20,9 @@ while (true)
         if (Choose == 7)
             break;
         if (Choose >= 8)
+        {
             manager.PrintError("Ты обезьяна? Сказано выбрато только из восьми!\n");
-
+        }
         switch (Choose)
         {
             case 0:
@@ -93,6 +94,16 @@ while (true)
         manager.PrintError($"Завязывай писать всякое, а то ошибка вылезла, от тебя требуется циферка");
     }
 
+}
+void ShowLoadingAnimation(string message, int delay = 500)
+{
+    Console.Write(message);
+    for (int i = 0; i < 3; i++)
+    {
+        Thread.Sleep(delay);
+        Console.Write(".");
+    }
+    Console.WriteLine();
 }
 class NoteManager
 {
