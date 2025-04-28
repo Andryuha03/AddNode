@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Linq;
 
 NoteManager manager = new NoteManager();
 manager.LoadFromFile();
@@ -121,7 +122,10 @@ class NoteManager
                 if (!string.IsNullOrEmpty(json))
                 {
                     var noteList = JsonSerializer.Deserialize<List<Note>>(json);
-                    strings = noteList.ToDictionary(note => note.ID);
+                    if(noteList != null)
+                        strings = noteList.ToDictionary(note => note.ID);
+                    else
+                        strings = new Dictionary<int, Note>();
                 }
             }
         }
@@ -156,7 +160,8 @@ class NoteManager
     {
         Console.WriteLine("Оставьте заметку (или введите 'q' для выхода в меню)");
         string? anywords = Console.ReadLine();
-        qExit(anywords);
+        if (anywords?.Trim().ToLower() == "q")
+            return;
         if (string.IsNullOrWhiteSpace(anywords))
         {
             PrintError("Поле с заметкой не должно быть пустым");
@@ -190,7 +195,7 @@ class NoteManager
     }
     public void DeleteNotes() // Удалить заявку 
     {
-        if (strings.Count == 0)
+        if (strings == null || strings.Count == 0)
         {
             PrintInfo("Нет заметок для поиска");
             return;
@@ -198,7 +203,8 @@ class NoteManager
         Console.WriteLine("Выберите номер заметки для удаления (или введите 'q' для выхода в меню)");
 
         string ChooseID = Console.ReadLine();
-        qExit(ChooseID);
+        if (ChooseID?.Trim().ToLower() == "q")
+            return;
         try
         {
             int ChooseDel = Convert.ToInt32(ChooseID);
@@ -218,14 +224,15 @@ class NoteManager
 
     public void SearchNotes()//Поиск
     {
-        if (strings.Count == 0)
+        if (strings == null || strings.Count == 0)
         {
             PrintInfo("Нет заметок для поиска");
             return;
         }
         Console.WriteLine("Введите ключевое слово для поиска (или введите 'q' для выхода в меню)");
         string? keyword = Console.ReadLine();
-        qExit(keyword);
+        if (keyword?.Trim().ToLower() == "q")
+            return;
         var SearchWord = strings.Values.Where(n => n.Text.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
         if (SearchWord.Count == 0)
         {
@@ -245,11 +252,12 @@ class NoteManager
     }
     public void SearchDate()
     {
-        if (strings.Count == 0)
+        if (strings == null || strings.Count == 0)
         { PrintInfo("Заметок нет"); return; }
         Console.WriteLine("Введите дату (или введите 'q' для выхода в меню)");
         string? input = Console.ReadLine();
-        qExit(input);
+        if (input?.Trim().ToLower() == "q")
+            return;
         try
         {
             DateTime? keydate = null;
@@ -282,14 +290,15 @@ class NoteManager
 
     public void EditNotes() // Редактирование
     {
-        if (strings.Count == 0)
+        if (strings == null || strings.Count == 0)
         {
             PrintInfo("Нет заметок для изменения");
             return;
         }
         Console.WriteLine("Для изменения записи введите её ID (или введите 'q' для выхода в меню)");
         string? KeyWord = Console.ReadLine();
-        qExit(KeyWord);
+        if (KeyWord?.Trim().ToLower() == "q")
+            return;
         try
         {
             int idKeyWord = int.Parse(KeyWord);
@@ -319,27 +328,25 @@ class NoteManager
     }
     public void SortNoteByDateOld()
     {
-        var sorter = strings.Values.OrderByDescending(n => n.DateAt);
-
+        var sorter = strings.Values.OrderByDescending(n => n.DateAt).ToList();
+        strings = sorter.ToDictionary(note => note.ID, note => note);
+        SaveToFile();
         foreach (var n in sorter)
         {
-            Note srt = new Note(n.ID, n.Text, n.DateAt);
             PrintInfo("--------------");
             Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
         }
-        SaveToFile();
     }
     public void SortNoteByDateNew()
     {
-        var sorter = strings.Values.OrderBy(n => n.DateAt);
+        var sorter = strings.Values.OrderBy(n => n.DateAt).ToList();
+        strings = sorter.ToDictionary(note => note.ID, note => note);
+        SaveToFile();
         foreach (var n in sorter)
         {
-            Note srt = new Note(n.ID, n.Text, n.DateAt);
             PrintInfo("--------------");
             Console.WriteLine($"{n.ID}. {n.Text} ({n.DateAt})");
         }
-        SaveToFile();
-
     }
 
     private void SaveToFile()
